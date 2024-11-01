@@ -4,4 +4,5 @@ using Documenter, ClenshawCurtisQuadrature #load the package and Documenter
 #generate the documentation
 makedocs(
     sitename="ClenshawCurtisQuadrature.jl",
+    doctest = false,    #FIXME: enable once examples are added to the documenation
 )
