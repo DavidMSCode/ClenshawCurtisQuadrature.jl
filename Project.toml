@@ -1,7 +1,10 @@
 name = "ClenshawCurtisQuadrature"
 uuid = "59744424-2764-45d9-a2de-33bc68f5e712"
 authors = ["David Stanley"]
-version = "1.0.0-DEV"
+version = "0.1.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [compat]
 julia = "1.6.7"
