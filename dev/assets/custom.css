@@ -1,0 +1,42 @@
+/* Custom CSS for Tufte-style margin note */
+.admonition.is-info {
+    position: relative;
+    float: right;
+    width: var(--margin-width);
+    margin-left: 1em;
+    margin-right: calc(-1*var(--margin-width));
+    font-size: 0.85em;
+    color: #ffffff;
+    background: #ffffff;
+    padding: 0.5em;
+    border-style: none !important;
+    border-width: 0px;
+    border-left: 2px solid #3852C7 !important;
+}
+
+.docstring {
+    clear: right;
+}
+
+.content {
+    margin-right: var(--margin-width);
+    margin-left: 0px;
+}
+
+:root {
+    --margin-width: 300px;  /* Set the desired width of the margin note */
+}
+
+@media screen and (min-width: 1150px) {
+    html.theme--documenter-dark #documenter .docs-main {
+        max-width: 1150px;
+        margin-left: 20rem;
+        padding-right: 1rem;
+    }
+}
+
+@media screen and (max-width: 1150px) {
+    html.theme--documenter-dark #documenter .docs-main {
+        width: 100%;
+    }
+}
