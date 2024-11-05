@@ -16,5 +16,5 @@ julia> ]
 ```
 and run
 ```julia
-add https://github.com/DavidMSCode/ClenshawCurtisQuadrature.jl
+(@environment) pkg> add https://github.com/DavidMSCode/ClenshawCurtisQuadrature.jl
 ```

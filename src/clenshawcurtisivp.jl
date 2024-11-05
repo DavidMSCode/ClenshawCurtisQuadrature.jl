@@ -1,155 +1,155 @@
 using LinearAlgebra
-"""
-	interpolate(taus::AbstractVector{<:Real}, N::Integer; recursive::Bool = false)
 
-Compute a matrix of Chebyshev polynomials of the first kind ``T_n(\\tau)`` for ``\\tau=taus`` and ``n = 0,1,...,N``.
+"""
+	interpolate(τs::AbstractVector{<:Real}, N::Integer; recursive::Bool = false)
+
+Computes a matrix of Chebyshev polynomials of the first kind ``T_n(τ)`` for 
+``τ ∈ τs`` and ``n = 0,1,...,N``. Used with Chebyshev coefficients to 
+calculate the value of the interpolating polynomials at the given values of 
+``τ``.
 
 # Arguments
-- `taus::AbstractVector{<:Real}`: The points at which to evaluate the Chebyshev polynomials.
+- `τs::AbstractVector{<:Real}`: The points at which to evaluate the Chebyshev
+ polynomials.
 - `N::Integer`: The polynomial degree.
-- `recursive::Bool`: If true, use the recursive formula to compute the Chebyshev polynomials within the domain [-1,1]. If false, use the trigonometric formulation. Default is false.
+- `recursive::Bool`: If true, use the recursive formula to compute the
+Chebyshev polynomials within the domain [-1,1]. If false, use the
+trigonometric formulation. Default is false.
 
 # Returns
-- `Ts`: A matrix of Chebyshev polynomial values at the given values of tau.
-
-# Description
-This function computes the value of the N+1 Chebyshev polynomials at the given points in the domain [-1,1]. If the input `taus` is a scalar, it is converted to a vector. The function then computes the unweighted Chebyshev polynomial values at each tau.
+- `Ts`: A matrix of Chebyshev polynomial values at the given values of τ.
 """
-function interpolate(taus::AbstractVector{<:Real}, N::Integer; recursive::Bool = false)
-	#find the indeces of the taus that are outside the domain
-	idx_outside = findall(x -> abs(x) > 1, taus)
-	if !isempty(idx_outside) #warn that if taus are outside domain then the output is extrapolation and has no guarantee of accuracy
-		@warn ("The input values at the following indices are outside the domain [-1,1]: $idx_outside. Extrapolated values may be innacurate.")
+function interpolate(τs::AbstractVector{<:Real}, N::Integer; recursive::Bool = false)
+	#find the indeces of the τs that are outside the domain
+	idx_outside = findall(x -> abs(x) > 1, τs)
+	if !isempty(idx_outside)
+		@warn ("The input values at the following indices are outside the
+		domain [-1,1]: $idx_outside. Extrapolated values may be innacurate.")
 	end
 
-	#Get the uneweighted Chebyshev polynomial values at each tau
+	#Get the uneweighted Chebyshev polynomial values at each τ
 	js = 0:N
 	if !recursive
-		#Default behaviour: Use the trig formulation and only use the recursive formula if tau is outside the domain [-1,1]
-		Ts = [abs(tau) <= 1 ? trig_chebyshev(tau, j) : recursive_chebyshev(tau, j) for tau in taus, j in js]
+		#Default behaviour: Use the trig formulation and only use the recursive
+		#formula if τ is outside the domain [-1,1]
+		Ts = [abs(τ) <= 1 ? trig_chebyshev(τ, j) :
+			  recursive_chebyshev(τ, j) for τ in τs, j in js]
 	else
 		#always use the recursive formula if recursive is true
-		Ts = [recursive_chebyshev(tau, j) for tau in taus, j in js]
+		Ts = [recursive_chebyshev(τ, j) for τ in τs, j in js]
 	end
 	return Ts
 end
 
-"""
-	interpolate(tau::Real, N::Integer; recursive = false)
-
-Computes a 1x(N+1) matrix of Chebyshev polynomials of the first kind ``T_n(\\tau)`` for ``n = 0,1,...,N``.
-
-# Arguments
-- `tau::Real`: The point at which to evaluate the Chebyshev polynomials.
-- `N::Integer`: The polynomial degree.
-- `recursive::Bool`: If true, use the recursive formula to compute the Chebyshev polynomials within the domain [-1,1]. If false, use the trigonometric formulation. Default is false.
-
-# Returns
-- `Ts`: A matrix of Chebyshev polynomial values at the given value of tau.
-
-# Description
-This function computes the value of the N+1 Chebyshev polynomials at the given point in the domain [-1,1].  The function then computes the unweighted Chebyshev polynomial at tau.
-"""
-function interpolate(tau::Real, N::Integer; recursive = false)
-	return interpolate([tau], N; recursive = recursive)
+@doc (@doc interpolate)
+function interpolate(τ::Real, N::Integer; recursive = false)
+	return interpolate([τ], N; recursive = recursive)
 end
 
 """
-	trig_chebyshev(tau::Real, N::Integer)
+	trig_chebyshev(τ::Real, N::Integer)
 
-Computes cos(N * acos(tau)). The trigonometric form of the Chebyshev polynomial N at the point tau.
+Computes the Chebyshev polynomial of the first kind using the trigonometric
+form ``T_N(τ) = cos(N * acos(τ))`` for some ``τ ∈ [-1,1]`` and ``N = 0,1,...``.
 
 # Arguments
-- `tau::Real`: The point at which to evaluate the Chebyshev polynomial.
+- `τ::Real`: The point at which to evaluate the Chebyshev polynomial.
 - `N::Integer`: The polynomial degree.
 
 # Returns
 - `T`: The Chebyshev polynomial value at the given point.
 """
-function trig_chebyshev(tau::Real, N::Integer)
-	return cos(N * acos(tau))
+function trig_chebyshev(τ::Real, N::Integer)
+	return cos(N * acos(τ))
 end
 
 """
-	recursive_chebyshev(tau::Real, N::Integer)
+	recursive_chebyshev(τ::Real, N::Integer)
 
-Computes ``T_N(tau) = 2 * tau * T_{N-1}(tau) - T_{N-2}(tau)`` the Nth Chebyshev polynomial at tau using the recursive formula.
+Computes the Chebyshev polynomial of the first kind using the recursive formula
+``T_N(τ) = 2 * τ * T_{N-1}(τ) - T_{N-2}(τ)`` for some ``τ ∈ ℝ`` and
+``N = 0,1,...``.
 
 # Arguments
-- `tau::Real`: The point at which to evaluate the Chebyshev polynomial.
+- `τ::Real`: The point at which to evaluate the Chebyshev polynomial.
 - `N::Integer`: The polynomial degree.
 
 # Returns
 - `T`: The Chebyshev polynomial value at the given point.
 """
-function recursive_chebyshev(tau::Real, N::Integer)
+function recursive_chebyshev(τ::Real, N::Integer)
 	if N == 0
 		return 1
 	elseif N == 1
-		return tau
+		return τ
 	else
-		return 2 * tau * recursive_chebyshev(tau, N - 1) - recursive_chebyshev(tau, N - 2)
+		return 2 * τ * recursive_chebyshev(τ, N - 1) - recursive_chebyshev(τ, N - 2)
 	end
 end
 
 """
-	chebyshev(N::Integer, M::Integer)
+	chebyshev(N::Integer; M::Integer=N)
 
-Compute the value of the N+1 Chebyshev polynomials at the M+1 points.
+Computes the value of the N+1 Chebyshev polynomials at the M+1 points cosine
+spaced nodes on the interval [-1,1].
 
 # Arguments
 - `N::Integer`: The polynomial degree.
-- `M::Integer`: The sampling degree. Must be greater than or equal to the polynomial degree. This is equal to the total number of function sampling points minus 1.
+- `M::Integer`: The sampling degree. Must be greater than or equal to the
+polynomial degree. This is equal to the total number of function sampling
+points minus 1. Defaults to `N`.
 
 # Returns
 - `Ts`: The Chebyshev polynomial values at the M+1 points.
 
 # Description
-This function computes the value of the N+1 Chebyshev polynomials at the M+1 cosine spaced nodes. It first generates the cosine spaced sample points from [-1,1] using the `cosineSamplePoints` function. Then, it computes the unweighted Chebyshev polynomial values at each tau.
+This function computes the value of the N+1 Chebyshev polynomials at the M+1
+cosine spaced nodes. It first generates the cosine spaced sample points from
+[-1,1] using the `cosineSamplePoints` function. Then, it computes the
+unweighted Chebyshev polynomial values at each τ.
 """
-function chebyshev(N::Integer, M::Integer)
+function chebyshev(N::Integer, M::Integer=N)
 	# Get the uneweighted Chebyshev polynomials at each of the M+1 points
-	taus = cosineSamplePoints(M)
+	τs = cosineSamplePoints(M)
 	js = 0:N
-	Ts = interpolate(taus, N)
+	Ts = interpolate(τs, N)
 	return Ts
 end
 
 """
 	cosineSamplePoints(M::Integer)
 
-Compute the cosine spaced sample points from [-1,1].
-
-# Arguments
-- `M::Integer`: The number of sample points.
+Computes `M+1` cosine spaced sample points from [-1,1].
 
 # Returns
-- `taus`: The cosine spaced sample points from [-1,1].
-
-# Description
-This function computes the cosine spaced sample points from [-1,1]. It generates M+1 points from 0 to M and computes the cosine of each point multiplied by pi divided by M.
+- `τs`: The cosine spaced sample points from [-1,1].
 """
 function cosineSamplePoints(M::Integer)
 	# Cosine Sample points (M+1 points) from [-1,1]
-	taus = 0:M
-	return -cos.(pi * taus / M)
+	τs = 0:M
+	return -cos.(pi * τs / M)
 end
 
 """
-	lsq_chebyshev_fit(N::Integer, M::Integer)
+	lsq_chebyshev_fit(N::Integer, M::Integer=N)
 
 Compute the Chebyshev polynomials and the Least Squares Operator matrix.
 
 # Arguments
 - `N::Integer`: The polynomial degree.
-- `M::Integer`: The sampling degree. Must be greater than or equal to the polynomial degree. This is equal to the total number of function sampling points minus 1.
+- `M::Integer`: The sampling degree. Must be greater than or equal to the
+polynomial degree. This is equal to the total number of function sampling
+points minus 1. Defaults to `N`.
 
 # Returns
 - `T`: The Chebyshev polynomial values at the M+1 points.
 - `A`: The Least Squares Operator matrix.
 
 # Description
-This function computes the Chebyshev polynomials at the M+1 points and the Least Squares Operator matrix. It first generates the Chebyshev polynomials using the `chebyshev` function. Then, it constructs the weights matrix, W, and the V matrix. Finally, it computes the Least Squares Operator matrix, A.
+This function computes the Chebyshev polynomials at the M+1 points and the
+Least Squares Operator matrix. It first generates the Chebyshev polynomials
+using the `chebyshev` function. Then, it constructs the weights matrix, W,
+and the V matrix. Finally, it computes the Least Squares Operator matrix, A.
 
 # Example
 ```julia
@@ -158,7 +158,7 @@ M = 5
 T, A = lsq_chebyshev_fit(N, M)
 ```
 """
-function lsq_chebyshev_fit(N::Integer, M::Integer)
+function lsq_chebyshev_fit(N::Integer, M::Integer=N)
 	#generate the Chebyshev polynomials at the nodes
 	T = chebyshev(N, M)
 
@@ -183,29 +183,32 @@ function lsq_chebyshev_fit(N::Integer, M::Integer)
 end
 
 """
-	clenshaw_curtis_nested_ivpd(N::Integer, M::Integer, d::Integer)
+	clenshaw_curtis_nested_ivpd(d::Integer, N::Integer, M::Integer=N)
 
-Compute the Clenshaw-Curtis quadrature and Chebyshev basis function matrices for a d-th order integral.
+Compute the Clenshaw-Curtis quadrature and Chebyshev basis function matrices
+for an Nth degree polynomial and for a `d`-th order integral on the interval [-1,1].
 
 # Arguments
-- `N::Integer`: The polynomial degree.
-- `M::Integer`: The sampling degree. Must bes greater than or equal to the polynomial degree. This is equal to the total number of function sampling points minus 1.
 - `d::Integer`: The integral order.
+- `N::Integer`: The polynomial degree.
+- `M::Integer`: The sampling degree. Must be greater than or equal to the
+polynomial degree. The integrand is evaluated at `M+1` cosine spaced nodes.
+Defaults to `N`.
+
 
 # Returns
 - `A`: The Least Squares Operator matrix.
 - `P`: The Quadrature Matrix.
 - `T`: The Chebyshev Matrix.
-
-# Description
-This function computes the Clenshaw-Curtis quadrature matrices and the basis function vectors a. It first generates the Chebyshev polynomials and the Least Squares Operator matrix using the `lsq_chebyshev_fit` function. Then, it calculates the Constants of Integration, and constructs the S matrix. Finally, it computes the Clenshaw Curtis Quadrature matrix.
 """
-function clenshaw_curtis_nested_ivpd(N::Integer, M::Integer, d::Integer)
-	if M < N
-		throw(ArgumentError("The number of sampling nodes must be greater than the polynomial order, N."))
+function clenshaw_curtis_nested_ivpd(d::Integer, N::Integer, M::Integer=N-d)
+	if M < N-d
+		throw(ArgumentError("The number of sampling nodes must be greater than
+		the polynomial order, N."))
 	end
 	if d > N
-		throw(ArgumentError("The polynomial order N must be greater than or equal to the integral order d."))
+		throw(ArgumentError("The polynomial order N must be greater than or
+		equal to the integral order d."))
 	end
 
 	# Least Squares Operator for "acceleration"
@@ -236,13 +239,16 @@ function clenshaw_curtis_nested_ivpd(N::Integer, M::Integer, d::Integer)
 end
 
 """
-	clenshaw_curtis_ivpii(N::Integer, M::Integer)
+	clenshaw_curtis_ivpii(N::Integer, M::Integer=N)
 
-Compute the Clenshaw-Curtis quadrature and Cebyshev basis function matrices for a second order initial value problem.
+Compute the Clenshaw-Curtis quadrature and Cebyshev basis function matrices for
+a second order initial value problem on the interval [-1,1].
 
 # Arguments
 - `N::Integer`: The polynomial degree.
-- `M::Integer`: The sampling degree. Must bes greater than or equal to the polynomial degree. This is equal to the total number of function sampling points minus 1.
+- `M::Integer`: The sampling degree. Must bes greater than or equal to the
+polynomial degree. This is equal to the total number of function sampling
+points minus 1. Defaults to `N`.
 
 # Returns
 - `A`: The Least Squares Operator matrix.
@@ -252,19 +258,19 @@ Compute the Clenshaw-Curtis quadrature and Cebyshev basis function matrices for 
 - `P2`: The Quadrature Matrix for velocity to position.
 - `T2`: The "Position" Chebyshev Matrix.
 
-# Description
-This function computes the Clenshaw-Curtis quadrature matrices and the basis function vectors a. It first generates the Chebyshev polynomials and the Least Squares Operator matrix using the `lsq_chebyshev_fit` function. Then, it calculates the "Position" and "Velocity" Constants of Integration, and constructs the S matrices for "velocity" and "position". Finally, it computes the Clenshaw Curtis Quadrature matrices for acceleration to velocity and velocity to position.
-
 # Example
 ```julia
 N = 5
 M = 5
 A, Ta, P1, T1, P2, T2 = clenshaw_curtis_ivpii(N, M)
+```
+
 """
-function clenshaw_curtis_ivpii(N::Integer, M::Integer)
-	if M < N
-		throw(ArgumentError("The number of sampling nodes must be greater than the polynomial order, N."))
-	end
+function clenshaw_curtis_ivpii(N::Integer, M::Integer=N)
+	# if M < N
+	# 	throw(ArgumentError("The number of sampling nodes must be greater than
+	# 	the polynomial order, N."))
+	# end
 
 	# Least Squares Operator for "acceleration"
 	Ta, A = lsq_chebyshev_fit(N - 2, M)
@@ -298,27 +304,28 @@ function clenshaw_curtis_ivpii(N::Integer, M::Integer)
 end
 
 """
-	clenshaw_curtis_ivpi(N::Integer, M::Integer)
+	clenshaw_curtis_ivpi(N::Integer, M::Integer=N)
 
-Compute the Clenshaw-Curtis quadrature and Cebyshev basis function matrices for a first order initial value problem.
+Compute the Clenshaw-Curtis quadrature and Cebyshev basis function matrices for
+a first order initial value problem on the interval [-1,1].
 
 # Arguments
 - `N::Integer`: The polynomial degree.
-- `M::Integer`: The sampling degree. Must bes greater than or equal to the polynomial degree. This is equal to the total number of function sampling points minus 1.
+- `M::Integer`: The sampling degree. Must bes greater than or equal to the
+polynomial degree. This is equal to the total number of function sampling
+points minus 1. Defaults to `N`.
 
 # Returns
 - `A`: The Least Squares Operator matrix.
 - `Ta`: The "acceleration" Chebyshev Matrix.
 - `P1`: The Quadrature Matrix for acceleration to velocity.
 - `T1`: The "Velocity" Chebyshev Matrix.
-
-# Description
-This function computes the Clenshaw-Curtis quadrature matrices and the basis function vectors a. It first generates the Chebyshev polynomials and the Least Squares Operator matrix using the `lsq_chebyshev_fit` function. Then, it calculates the "Velocity" Constants of Integration, and constructs the S matrices for "velocity". Finally, it computes the Clenshaw Curtis Quadrature matrices for acceleration to velocity.
 """
-function clenshaw_curtis_ivpi(N::Integer, M::Integer)
-	if M < N
-		throw(ArgumentError("The number of sampling nodes, M, must be greater than or equal to the polynomial order, N."))
-	end
+function clenshaw_curtis_ivpi(N::Integer, M::Integer=N)
+	# if M < N
+	# 	throw(ArgumentError("The number of sampling nodes, M, must be greater
+	# 	than or equal to the polynomial order, N."))
+	# end
 
 	# Least Squares Operator for "acceleration"
 	Ta, A = lsq_chebyshev_fit(N - 1, M)
@@ -346,47 +353,3 @@ function clenshaw_curtis_ivpi(N::Integer, M::Integer)
 	return A, Ta, P1, T1
 end
 
-"""
-	clenshaw_curtis_ivpii(N::Integer)
-
-Compute the Clenshaw-Curtis quadrature and Cebyshev basis function matrices for a second order initial value problem.
-
-# Arguments
-- `N::Integer`: The polynomial degree.
-
-# Returns
-- `A`: The Least Squares Operator matrix.
-- `Ta`: The "acceleration" Chebyshev Matrix.
-- `P1`: The Quadrature Matrix for acceleration to velocity.
-- `T1`: The "Velocity" Chebyshev Matrix.
-- `P2`: The Quadrature Matrix for velocity to position.
-- `T2`: The "Position" Chebyshev Matrix.
-
-# Description
-This function computes the Clenshaw-Curtis quadrature matrices and the basis function vectors a. It first generates the Chebyshev polynomials and the Least Squares Operator matrix using the `lsq_chebyshev_fit` function. Then, it calculates the "Position" and "Velocity" Constants of Integration, and constructs the S matrices for "velocity" and "position". Finally, it computes the Clenshaw Curtis Quadrature matrices for acceleration to velocity and velocity to position.
-
-"""
-function clenshaw_curtis_ivpii(N::Integer)
-	return clenshaw_curtis_ivpii(N, N)
-end
-
-"""
-	clenshaw_curtis_ivpi(N::Integer)
-
-Compute the Clenshaw-Curtis quadrature and Cebyshev basis function matrices for a first order initial value problem.
-
-# Arguments
-- `N::Integer`: The polynomial degree.
-
-# Returns
-- `A`: The Least Squares Operator matrix.
-- `Ta`: The "acceleration" Chebyshev Matrix.
-- `P1`: The Quadrature Matrix for acceleration to velocity.
-- `T1`: The "Velocity" Chebyshev Matrix.
-
-# Description
-This function computes the Clenshaw-Curtis quadrature matrices and the basis function vectors a. It first generates the Chebyshev polynomials and the Least Squares Operator matrix using the `lsq_chebyshev_fit` function. Then, it calculates the "Velocity" Constants of Integration, and constructs the S matrices for "velocity". Finally, it computes the Clenshaw Curtis Quadrature matrices for acceleration to velocity.
-"""
-function clenshaw_curtis_ivpi(N::Integer)
-	return clenshaw_curtis_ivpi(N, N)
-end
