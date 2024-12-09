@@ -111,7 +111,6 @@ unweighted Chebyshev polynomial values at each τ.
 function chebyshev(N::Integer, M::Integer=N)
 	# Get the uneweighted Chebyshev polynomials at each of the M+1 points
 	τs = cosineSamplePoints(M)
-	js = 0:N
 	Ts = interpolate(τs, N)
 	return Ts
 end
