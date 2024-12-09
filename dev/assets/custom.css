@@ -5,7 +5,7 @@
     width: var(--margin-width);
     margin-left: 1em;
     margin-right: calc(-1*var(--margin-width));
-    font-size: 0.85em;
+    font-size: 0.85em !important;
     color: #ffffff;
     background: #ffffff;
     padding: 0.5em;
