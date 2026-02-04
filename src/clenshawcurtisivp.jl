@@ -284,7 +284,7 @@ function clenshaw_curtis_ivpii(N::Integer, M::Integer=N)
 	temp4 = Diagonal(temp4diag)
 	temp5 = diagm(N + 1, N, -1 => ones(N), 1 => [0; -ones(N - 2)])
 	Sp = temp4 * temp5
-	Sp[1, 1] = 0.25
+	Sp[1, 2] = 0.25
 	Sp[2, 1] = 1.0
 
 	#Picard Integration Operator for velocity to position
