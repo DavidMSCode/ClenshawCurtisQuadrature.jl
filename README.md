@@ -8,7 +8,7 @@ ClenshawCurtisQuadrature.jl is a Julia package that provides tools for performin
 
 Currently in development and not included in any package registries. Users will need to manually add the package with this Github repository url
 ```Julia
-julia> Using Pkg; Pkg.add(url="https://github.com/DavidMSCode/ClenshawCurtisQuadrature.jl")
+julia> using Pkg; Pkg.add(url="https://github.com/DavidMSCode/ClenshawCurtisQuadrature.jl")
 ```
 or enter the package manager with 
 ```julia
